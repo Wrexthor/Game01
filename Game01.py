@@ -59,12 +59,20 @@ class Npc:
     def __init__(self, name, hp, dmg, count):
         # name of npc
         self.name = name
+        # description of npc
+        self.description
         # hitpoints
         self.hp = hp
         # damage done
         self.dmg = dmg
         # amount of npc's
         self.count = count
+        self.fame_added
+
+class Merchant(Npc):
+    def __init__(self):
+        self.fame_added = 5
+        self.gold_added = 10
 
 # npc sub classes
 # types available, slave, merchant, fighter, cheiftan
