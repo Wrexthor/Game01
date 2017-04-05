@@ -1,13 +1,83 @@
 from random import randint
 
-# player class
-# fame variable (int)
-# dread variable (int)
-# supplies variable (int)
-# inventory array (obj)
-# traits variable (int)
-# followers variable (int)
-# name varaible (string)
+
+class Game:
+    def __init__(self):
+        self.onward = False
+        self.march = False
+        self.camp = False
+
+    def cmd_help(self):
+        print('Commands available:'
+              'help - lists all commands'
+              'stats - shows player stats'
+              'camp - make camp, unlocks further commands marked with *'
+              'onward - moves player once, then makes camp'
+              'march - automatically moves onward until supplies run out or player makes camp'
+              '*forage - gathers supplies'
+              '*motivate - increase troop motivation'
+              '*whip - increase fear of slaves'
+              'quit - exits game')
+
+
+    def cmd_stats(self, player):
+        # add more defintions
+        print(player.fame,
+              player.dread,
+              player.supplies,
+              player.followers.__len__(),
+              player.followers,
+              player.traits,
+              player.captured)
+
+    def cmd_camp(self):
+        print('Player makes camp for the night..')
+        self.camp = True
+
+    def cmd_onward(self):
+        print('Time to move forward')
+        self.onward = True
+
+    def cmd_march(self):
+        print('Marching forward, stopping for no man!')
+        self.march = True
+
+    def cmd_forage(self, player):
+        if self.camp:
+            print('Lets get some supplies!')
+            random = randint(1, 10)
+            player.supplies + random
+            print('Found ' + random + ' supplies')
+        else:
+            print('You need to make camp before attempting to forage.')
+
+    def cmd_motivate(self, player):
+        # check if camped and if followers present
+        if self.camp & player.followers.__len__ > 0:
+            print('I have a dream...')
+            # add value between 1 and 3 to each follower
+            for val in player.followers:
+                if val.motivation == True:
+                    random = randint(1, 3)
+                    val.motivation + random
+        else:
+            print('You need to make camp and have some followers before attempting to motivate.')
+
+    def cmd_whip(self, player):
+        # check if camped and if followers present
+        if self.camp & player.followers.__len__ > 0:
+            print('Bow before me puny slaves!')
+            # add value between 1 and 3 to each follower
+            for val in player.followers:
+                if val.fear == True:
+                    random = randint(1, 3)
+                    val.fear + random
+        else:
+            print('You need to make camp and have some slaves before attempting to whip them.')
+
+    def cmd_quit(self):
+        print('Please come again!')
+        exit()
 
 
 class Player:
@@ -126,17 +196,6 @@ class Player:
 # need to define values of each trait
 traits = {'trait1': [0, 0, 0]}
 
-# dict of npc's
-# need to define values of each npc
-# these can be used to create objects from class NPC at encounter time
-# npcs = {'npc1': [0, 0, 0]}
-
-# npc base class
-# hit points variable (int)
-# damage variable (int)
-# name variable (string)
-# amount variable (int)
-
 
 class Npc:
     def __init__(self, name, description, fame_value, count):
@@ -200,12 +259,26 @@ class Pleasure(Slave):
                          fear=20,
                          count=count)
 
+class Event:
+    def __init__(self):
 
-# npc sub classes
-# types available, slave, merchant, fighter, cheiftan
+    def encounter_type(self):
+        random = randint(1, 9)
+        # type 1 fighting
+        # type 2 merchant
+        # type 3 distress
+        type = 0
+        # fighting encounter
+        if random > 6:
+            type = 1
+        # merchant encounter
+        if random <= 3:
+            type = 2
+        # distress encounter
+        if random > 3 & random <= 6:
+            type = 3
+        return type
 
-# menu class
-# takes choice of player
 
 # event class
 # based on input parameters (like fame, dread etc)
