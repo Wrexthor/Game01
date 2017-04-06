@@ -207,17 +207,17 @@ class Npc:
         self.fame_value = fame_value
         # amount of fame value added, dependant on count
         self.fame_total = self.fame_value * self.count
-        # hit points
-        self.hp = 10
 
 
 class Fighter(Npc):
-    def __init__(self):
-        self.fame_added = 5
+    def __init__(self, name, description, fame_value, count, dmg, morale, hp):
         # damage done
-        self.dmg = 10
+        self.dmg = dmg
         # morale, if 0 escapes
-        self.morale = 10
+        self.morale = morale
+        # hit points
+        self.hp = hp
+        super().__init__(name, description, fame_value, count)
 
 
 class Merchant(Npc):
@@ -226,8 +226,9 @@ class Merchant(Npc):
 
 
 class Slave(Npc):
-    def __init__(self):
+    def __init__(self, name, description, fame_value, count):
         self.fear = 10
+        super().__init__(name, description, fame_value, count)
 
 
 class Soldier(Fighter):
@@ -235,20 +236,20 @@ class Soldier(Fighter):
         super().__init__(name='Soldier',
                          description='A trained soldier',
                          fame_value=3,
-                         fear=20,
+                         morale=20,
                          count=count)
 
 
 class Gladiator(Fighter, Slave):
     def __init__(self, count):
+        self.count = count
         super().__init__(name='Gladiator',
                          description='A slave that fights until death, oftentimes for the entertainment of its master',
-                         fame_value=4,
-                         hp=10,
-                         dmg=2,
-                         morale=100,
-                         fear=10,
-                         count=count)
+                         fame_value=4*count,
+                         count=count,
+                         hp=10*count,
+                         dmg=2*count,
+                         morale=10)
 
 
 class Pleasure(Slave):
@@ -256,13 +257,12 @@ class Pleasure(Slave):
         super().__init__(name='Pleasure Slave',
                          description='A slave whos existance is solely to give pleasure to others',
                          fame_value=3,
-                         fear=20,
                          count=count)
 
 class Event:
-    def __init__(self):
 
     def encounter_type(self):
+        # determine type of encounter
         random = randint(1, 9)
         # type 1 fighting
         # type 2 merchant
@@ -279,6 +279,21 @@ class Event:
             type = 3
         return type
 
+    def encounter_action(self, type):
+        # depending on type, define encounter event
+        if type == 1:
+            print('And there was a firefight!')
+
+        if type == 2:
+            print('Do come back.')
+
+        if type == 3:
+            print('That princess sure could use some help..')
+
+        def encounter_start():
+            # run encounter
+            self.encounter_action(self.encounter_type())
+
 
 # event class
 # based on input parameters (like fame, dread etc)
@@ -286,20 +301,13 @@ class Event:
 
 p = Player()
 slave = Pleasure(5)
+gladiator = Gladiator(100)
 p.name = input('What is your characters name?')
-#
-# Commands = {
-#   'quit': Player.quit,
-#   'help': Player.help,
-#   'status': Player.status,
-#   'rest': Player.rest,
-#   'explore': Player.explore,
-#   'flee': Player.flee,
-#   'attack': Player.attack,
-#   }
+
 print('Type help for list of actions')
 
 # game loop
 while (True):
     print('inside the loop')
     print(p.name, p.fame, p.dread)
+    break
