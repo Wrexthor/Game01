@@ -1,6 +1,29 @@
 from random import randint
 
 
+'''
+Program synopsis
+Written by Jack Swedjemark
+
+Text based RPG where action is automated and more ephasis is placed on
+the story and events occuring.
+
+
+Classes
+Player - stores stats of player, list of npcs, items and traits
+and calculates combat based on stats
+
+NPC - stores npc stats
+
+Items - stores item stats
+ 
+Game - keeps track of user input, game state adn time simulations
+
+Event - Calculates event types, actions and chances using NPC and player stats, 
+calling player methods
+'''
+
+
 class Game:
     def __init__(self):
         self.onward = False
@@ -25,7 +48,7 @@ class Game:
         print(player.fame,
               player.dread,
               player.supplies,
-              player.followers.__len__(),
+              player.count,
               player.followers,
               player.traits,
               player.captured)
@@ -89,6 +112,7 @@ class Player:
         self.inventory = []
         self.traits = []
         self.followers = []
+        self.count = self.followers.__len__()
         self.level = 1
         self.captured = False
 
@@ -126,7 +150,7 @@ class Player:
 
     def damage_follower(self, dmg, count):
         # get random follower from list
-        random = randint(0, self.followers.__len__())
+        random = randint(0, self.count)
 
         # check if damage exceeds followers hp
         if dmg > self.followers[random].hp:
@@ -150,7 +174,7 @@ class Player:
             self.followers[random].remove()
             print(self.followers[random] + ' has died')
 
-    def damage_self(self):
+    def damage_self(self, traits):
         result = False
         # get random
         random = randint(0, 10)
@@ -160,18 +184,24 @@ class Player:
             result = True
         # if random below 6 and above 3, player is injured
         if random > 3 & random < 6:
-            self.traits
+            # need to llok up how to get random index of a dictionary with lists !!!!!!!!!!!
+            #self.traits + traits[(randint(0,10))]
+            #print('Player was injured, ' + traits[(randint(0, 10))] + ' was added')
             result = True
         else:
             result = False
         return result
 
+    def calc_traits(self, trait):
+        self.dread + trait[3]
+        self.fame + trait[4]
+        self.supplies + trait[5]
 
     def check_overwhelmed(self, count):
         # check if player has followers
         if self.check_follower():
             # checks if count of enemies is overwhelming the count of players army
-            if self.followers.__len__() * 1.5 < count:
+            if self.count * 1.5 < count:
                 # overwhelmed is false
                 return True
             else:
@@ -186,15 +216,17 @@ class Player:
                 # ok
                 return  False
 
+'''
+dict of traits
+value 0 in list is effect on health
+value 1 is effect on damage
+value 2 is effect on morale
+value 3 is effect on dread
+value 4 is effect on fame
+value 5 is effect on supplies
+'''
 
-
-# dict of items
-# need to define values of each item
-# items = {'item1': [0, 0, 0]}
-
-# dict of traits
-# need to define values of each trait
-traits = {'trait1': [0, 0, 0]}
+traits = {'Broken Leg': [-2, 0, 0, -5, 0, -1], 'Fever': [-2, -2, -4, 1, 0, 0]}
 
 
 class Npc:
@@ -223,6 +255,10 @@ class Fighter(Npc):
 class Merchant(Npc):
     def __init__(self):
         self.gold_added = 10
+
+        super().__init__(name='Merchant',
+                         description='Providing anything you need, if the price is right..',
+                         fame_value=3)
 
 
 class Slave(Npc):
@@ -261,6 +297,10 @@ class Pleasure(Slave):
 
 class Event:
 
+    def __init__(self, player):
+        self.player = player
+        self.count = 0
+
     def encounter_type(self):
         # determine type of encounter
         random = randint(1, 9)
@@ -283,6 +323,7 @@ class Event:
         # depending on type, define encounter event
         if type == 1:
             print('And there was a firefight!')
+            self.encounter_fight(self.player)
 
         if type == 2:
             print('Do come back.')
@@ -290,10 +331,32 @@ class Event:
         if type == 3:
             print('That princess sure could use some help..')
 
-        def encounter_start():
-            # run encounter
-            self.encounter_action(self.encounter_type())
+    def encounter_start(self):
+        # calculate how many enemies
+        self.calculate_count()
+        # run encounter
+        self.encounter_action(self.encounter_type())
 
+    def calculate_count(self):
+        # used to calculate how many enemies there are
+        followers = self.player.count
+        if followers > 0:
+            # more than 1 follower, calculate count based of followers
+            self.count = (followers * 100) / randint(70, 130)
+
+        else:
+            # no followers, chose random as count
+            self.count = randint(1, 75)
+
+
+    def encounter_fight(self):
+        random = randint(1, 10)
+        if random > 0 and random < 7:
+            npc = Soldier(self.count)
+            self.player.defend(npc.dmg, self.count)
+        if random > 6 and random < 10:
+            npc = Gladiator(self.count)
+            self.player.defend(npc.dmg, self.count)
 
 # event class
 # based on input parameters (like fame, dread etc)
@@ -303,6 +366,8 @@ p = Player()
 slave = Pleasure(5)
 gladiator = Gladiator(100)
 p.name = input('What is your characters name?')
+g = Game()
+e = Event(p)
 
 print('Type help for list of actions')
 
@@ -310,4 +375,10 @@ print('Type help for list of actions')
 while (True):
     print('inside the loop')
     print(p.name, p.fame, p.dread)
+    # check if camped
+    if g.camp == True:
+        g.cmd_camp()
+    else:
+        # run an ancounter
+        e.encounter_start()
     break
