@@ -1,4 +1,5 @@
 from random import randint
+import time, threading, queue
 
 
 '''
@@ -23,12 +24,38 @@ Event - Calculates event types, actions and chances using NPC and player stats,
 calling player methods
 '''
 
+'''
+def background(q):
+    while True:
+        stuff = input()
+        print('Recieved ' + stuff)
+        q.put(stuff)
+'''
+
+
 
 class Game:
     def __init__(self):
         self.onward = False
         self.march = False
         self.camp = False
+        self.input = 'empty'
+
+    def run(self):
+        t1 = threading.Thread(target=self.listen)
+        t1.start()
+
+    def listen(self):
+        while True:
+            self.input = input('Input value')
+            print('Recived ' + self.input)
+            self.check_listen()
+
+    def check_listen(self):
+        if self.input == 'help':
+            self.cmd_help()
+            self.input = 'empty'
+
 
     def cmd_help(self):
         print('Commands available:'
@@ -361,24 +388,29 @@ class Event:
 # event class
 # based on input parameters (like fame, dread etc)
 # outputs events
-
+#q = queue.Queue(0)
 p = Player()
 slave = Pleasure(5)
 gladiator = Gladiator(100)
 p.name = input('What is your characters name?')
 g = Game()
 e = Event(p)
+g.run()
 
 print('Type help for list of actions')
-
+#thread = threading.Thread(target=background, args=q)
+#thread.start()
 # game loop
 while (True):
     print('inside the loop')
-    print(p.name, p.fame, p.dread)
+    #print(q)
+    #print(p.name, p.fame, p.dread)
+    #g.check_listen()
+
     # check if camped
     if g.camp == True:
         g.cmd_camp()
     else:
         # run an ancounter
         e.encounter_start()
-    break
+    time.sleep(5)
