@@ -1,5 +1,5 @@
 from random import randint
-import time, threading, queue
+import time, threading, os
 
 
 '''
@@ -35,11 +35,12 @@ def background(q):
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, player):
         self.onward = False
-        self.march = False
+        # self.march = False
         self.camp = False
         self.input = 'empty'
+        self.player = player
 
     def run(self):
         t1 = threading.Thread(target=self.listen)
@@ -47,78 +48,110 @@ class Game:
 
     def listen(self):
         while True:
-            self.input = input('Input value')
+            # get user input
+            self.input = input()
+            # debug
             print('Recived ' + self.input)
             self.check_listen()
 
     def check_listen(self):
+        # check what input command is and executes if matching
+        # any of the commands
         if self.input == 'help':
             self.cmd_help()
             self.input = 'empty'
-
+        if self.input == 'stats':
+            self.cmd_stats()
+            self.input = 'empty'
+        if self.input == 'camp':
+            self.cmd_camp()
+            self.input = 'empty'
+        if self.input == 'onward':
+            self.cmd_onward()
+            self.input = 'empty'
+        if self.input == 'march':
+            self.cmd_march()
+            self.input = 'empty'
+        if self.input == 'forage':
+            self.cmd_forage()
+            self.input = 'empty'
+        if self.input == 'motivate':
+            self.cmd_motivate()
+            self.input = 'empty'
+        if self.input == 'whip':
+            self.cmd_whip()
+            self.input = 'empty'
+        if self.input == 'quit':
+            self.cmd_quit()
+            self.input = 'empty'
+        else:
+            if not self.input == 'empty':
+                print('Unknown command')
 
     def cmd_help(self):
-        print('Commands available:'
-              'help - lists all commands'
-              'stats - shows player stats'
-              'camp - make camp, unlocks further commands marked with *'
-              'onward - moves player once, then makes camp'
-              'march - automatically moves onward until supplies run out or player makes camp'
-              '*forage - gathers supplies'
-              '*motivate - increase troop motivation'
-              '*whip - increase fear of slaves'
-              'quit - exits game')
+        # print list of commands available to player
+        print('Commands available:\n'
+              'help - lists all commands\n'
+              'stats - shows player stats\n'
+              'camp - make camp, unlocks further commands marked with *\n'
+              'onward - moves player once, then makes camp\n'
+              'march - automatically moves onward until supplies run out or player makes camp\n'
+              '*forage - gathers supplies\n'
+              '*motivate - increase troop motivation\n'
+              '*whip - increase fear of slaves\n'
+              'quit - exits game\n')
 
-
-    def cmd_stats(self, player):
+    def cmd_stats(self):
         # add more defintions
-        print(player.fame,
-              player.dread,
-              player.supplies,
-              player.count,
-              player.followers,
-              player.traits,
-              player.captured)
+        print(self.player.fame,
+              self.player.dread,
+              self.player.supplies,
+              self.player.count,
+              self.player.followers,
+              self.player.traits,
+              self.player.captured)
 
     def cmd_camp(self):
         print('Player makes camp for the night..')
         self.camp = True
 
     def cmd_onward(self):
-        print('Time to move forward')
+        print('Player moves forward.')
         self.onward = True
+        self.camp = False
 
     def cmd_march(self):
-        print('Marching forward, stopping for no man!')
-        self.march = True
+        print('Player breaks camp and begins marching.')
+        # self.march = True
+        self.camp = False
 
-    def cmd_forage(self, player):
+    def cmd_forage(self):
         if self.camp:
             print('Lets get some supplies!')
             random = randint(1, 10)
-            player.supplies + random
+            self.player.supplies + random
             print('Found ' + random + ' supplies')
         else:
             print('You need to make camp before attempting to forage.')
 
-    def cmd_motivate(self, player):
+    def cmd_motivate(self):
         # check if camped and if followers present
-        if self.camp & player.followers.__len__ > 0:
-            print('I have a dream...')
+        if self.camp & self.player.followers.__len__ > 0:
+            print('Player motivates his followers: I have a dream...')
             # add value between 1 and 3 to each follower
-            for val in player.followers:
+            for val in self.player.followers:
                 if val.motivation == True:
                     random = randint(1, 3)
                     val.motivation + random
         else:
             print('You need to make camp and have some followers before attempting to motivate.')
 
-    def cmd_whip(self, player):
+    def cmd_whip(self):
         # check if camped and if followers present
-        if self.camp & player.followers.__len__ > 0:
-            print('Bow before me puny slaves!')
+        if self.camp & self.player.followers.__len__ > 0:
+            print('Player takes out his whip: Kneel slaves!')
             # add value between 1 and 3 to each follower
-            for val in player.followers:
+            for val in self.player.followers:
                 if val.fear == True:
                     random = randint(1, 3)
                     val.fear + random
@@ -127,7 +160,7 @@ class Game:
 
     def cmd_quit(self):
         print('Please come again!')
-        exit()
+        os._exit(1)
 
 
 class Player:
@@ -336,33 +369,34 @@ class Event:
         # type 3 distress
         type = 0
         # fighting encounter
-        if random > 6:
+        if random > 5:
             type = 1
         # merchant encounter
-        if random <= 3:
+        if random <= 2:
             type = 2
         # distress encounter
-        if random > 3 & random <= 6:
+        if random > 2 and random <= 5:
             type = 3
         return type
 
     def encounter_action(self, type):
         # depending on type, define encounter event
         if type == 1:
-            print('And there was a firefight!')
-            self.encounter_fight(self.player)
+            print('Player meets a gang of bandits, time to dull that blade of yours!')
+            self.encounter_fight()
 
         if type == 2:
-            print('Do come back.')
+            print('Player meets a merchant, greed plain in his eyes.')
 
         if type == 3:
-            print('That princess sure could use some help..')
+            print('Player sees a damsel conveniently in distress, time to comb those eyebrows!')
 
     def encounter_start(self):
         # calculate how many enemies
         self.calculate_count()
+        type = self.encounter_type()
         # run encounter
-        self.encounter_action(self.encounter_type())
+        self.encounter_action(type)
 
     def calculate_count(self):
         # used to calculate how many enemies there are
@@ -375,7 +409,6 @@ class Event:
             # no followers, chose random as count
             self.count = randint(1, 75)
 
-
     def encounter_fight(self):
         random = randint(1, 10)
         if random > 0 and random < 7:
@@ -385,32 +418,25 @@ class Event:
             npc = Gladiator(self.count)
             self.player.defend(npc.dmg, self.count)
 
-# event class
-# based on input parameters (like fame, dread etc)
-# outputs events
-#q = queue.Queue(0)
 p = Player()
 slave = Pleasure(5)
 gladiator = Gladiator(100)
 p.name = input('What is your characters name?')
-g = Game()
+g = Game(p)
 e = Event(p)
 g.run()
 
 print('Type help for list of actions')
-#thread = threading.Thread(target=background, args=q)
-#thread.start()
-# game loop
-while (True):
-    print('inside the loop')
-    #print(q)
-    #print(p.name, p.fame, p.dread)
-    #g.check_listen()
 
-    # check if camped
-    if g.camp == True:
-        g.cmd_camp()
-    else:
-        # run an ancounter
+# game loop
+while True:
+    # check if onward, if it is, run encounter and make camp
+    if g.onward:
+        g.onward = False
         e.encounter_start()
-    time.sleep(5)
+        g.cmd_camp()
+    # check if camped
+    if not g.camp:
+        # run an encounter
+        e.encounter_start()
+        time.sleep(5)
