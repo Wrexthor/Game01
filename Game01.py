@@ -203,7 +203,7 @@ class Player:
 
     def check_follower(self):
         # check if player has followers
-        if self.followers > 0:
+        if self.count > 0:
             return True
         else:
             return False
@@ -333,7 +333,9 @@ class Soldier(Fighter):
                          description='A trained soldier',
                          fame_value=3,
                          morale=20,
-                         count=count)
+                         count=count,
+                         hp=10,
+                         dmg=4)
 
 
 class Gladiator(Fighter, Slave):
